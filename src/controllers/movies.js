@@ -1,5 +1,11 @@
 const pool = require("../../config/db");
-const Joi = require("joi");
+const { movieSchema } = require("../utils/validation");
+const {
+  checkExistingMovie,
+  insertMovie,
+  updateMovieById,
+  checkMovieExists,
+} = require("../utils/queryMovies");
 
 const getMovies = async (req, res, next) => {
   try {
@@ -30,15 +36,7 @@ const getMovieById = async (req, res, next) => {
 
 const createMovies = async (req, res, next) => {
   try {
-    const schema = Joi.object({
-      titulo: Joi.string().required(),
-      director: Joi.string().required(),
-      anio: Joi.number().required(),
-      genero: Joi.string().required(),
-      descripcion: Joi.string().required(),
-    });
-
-    const { error } = schema.validate(req.body);
+    const { error } = movieSchema.validate(req.body);
 
     if (error) {
       return res.status(400).send(error.details[0].message);
@@ -46,15 +44,34 @@ const createMovies = async (req, res, next) => {
 
     const { titulo, director, anio, genero, descripcion } = req.body;
 
-    const response = await pool.query(
-      "INSERT INTO movies (titulo, director, anio, genero, descripcion) VALUES ($1, $2, $3, $4, $5) RETURNING *",
-      [titulo, director, anio, genero, descripcion]
+    // Verificar si la película ya existe
+    const movieAlreadyExists = await checkExistingMovie(
+      pool,
+      titulo,
+      director,
+      anio,
+      genero,
+      descripcion
     );
 
-    const movie = response.rows[0];
+    if (movieAlreadyExists) {
+      return res.status(409).json({
+        message: "La película ya existe",
+      });
+    }
+
+    // Insertar la nueva película
+    const movie = await insertMovie(
+      pool,
+      titulo,
+      director,
+      anio,
+      genero,
+      descripcion
+    );
 
     res.status(201).json({
-      message: "Pelicula creada correctamente",
+      message: "Película creada correctamente",
       data: movie,
     });
   } catch (error) {
@@ -91,23 +108,22 @@ const updateMovie = async (req, res, next) => {
   try {
     await pool.query("BEGIN");
 
-    // Verificar si la película existe
-    const movieExists = await pool.query(
-      "SELECT * FROM movies WHERE id_movie = $1",
-      [id]
-    );
-    if (movieExists.rows.length === 0) {
+    const movieExists = await checkMovieExists(pool, id);
+    if (!movieExists) {
       return res
         .status(404)
         .json({ error: `No se encontró la película con id ${id}` });
     }
 
-    // Actualizar la película
-    const response = await pool.query(
-      "UPDATE movies SET  titulo = $1, director = $2, anio = $3, genero = $4, descripcion = $5 WHERE id_movie = $6 RETURNING *",
-      [titulo, director, anio, genero, descripcion, id]
+    const updatedMovie = await updateMovieById(
+      pool,
+      id,
+      titulo,
+      director,
+      anio,
+      genero,
+      descripcion
     );
-    const updatedMovie = response.rows[0];
 
     await pool.query("COMMIT");
 
