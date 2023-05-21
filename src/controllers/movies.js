@@ -1,5 +1,5 @@
 const pool = require("../../config/db");
-const { movieSchema } = require("../utils/validation");
+const { movieSchema } = require("../utils/validationMovies");
 const {
   checkExistingMovie,
   insertMovie,

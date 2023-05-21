@@ -4,6 +4,8 @@ Este es un sistema de backend para administrar películas, con la capacidad de r
 
 ## Funcionalidades
 
+- http://localhost:4000/api/v1
+
 - **Obtener todas las películas:**
   - Método: GET
   - Ruta: `/movies`

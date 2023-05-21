@@ -1,5 +1,5 @@
 const pool = require("../../config/db");
-const { normalizeString } = require("../utils/normalize");
+const { normalizeString } = require("../utils/normalizeStr");
 const { isValidYear } = require("../utils/ValidateYear");
 
 const filterMovies = async (req, res, next) => {

@@ -1,5 +1,5 @@
 const pool = require("../../config/db");
-const { formatResults } = require("../utils/format");
+const { formatResults } = require("../utils/formatMovies");
 const {
   getFavoritesQuery,
   checkMovieFavorite,
@@ -44,7 +44,9 @@ const createFavorite = async (req, res, next) => {
 
     await addMovieFavorites(pool, movieId);
 
-    return res.status(200).json({ message: "Película agregada a favoritos." });
+    return res
+      .status(200)
+      .json({ message: `Película ${movieId} agregada a favoritos.` });
   } catch (error) {
     return next(error);
   }
