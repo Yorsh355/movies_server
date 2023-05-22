@@ -9,44 +9,47 @@ Este es un sistema de backend para administrar películas, con la capacidad de r
 - **Obtener todas las películas:**
   - Método: GET
   - Ruta: `/movies`
-  - Descripción: Devuelve todas las películas almacenadas en la base de datos.
+  - Descripción: La ruta recupera todas las películas de la base de datos y las devuelve como respuesta en formato JSON. Utiliza una conexión a la base de datos a través del módulo pool y ejecuta una consulta SQL para seleccionar todas las filas de la tabla "movies". Si la consulta es exitosa, se envían las películas como respuesta con un estado HTTP 200. En caso de error, se maneja el error para su posterior procesamiento. Se requiere configurar la conexión a la base de datos y asegurarse de tener los módulos necesarios instalados para su funcionamiento adecuado.
 
 - **Obtener una película:**
   - Método: GET
   - Ruta: `/movies/{id}`
-  - Descripción: Devuelve una película específica según su ID.
+  - Descripción: La ruta permite obtener una película específica de la base de datos según su ID. Utiliza una conexión a la base de datos a través del módulo pool y ejecuta una consulta SQL para seleccionar la película correspondiente al ID proporcionado. Si no se encuentra ninguna película con ese ID, se devuelve un error con un estado HTTP 404. En caso de éxito, se devuelve la película como respuesta en formato JSON con un estado HTTP 200. Si ocurre un error durante la consulta, se maneja para su posterior procesamiento. 
 
 - **Agregar una nueva película:**
   - Método: POST
   - Ruta: `/movies`
-  - Descripción: Agrega una nueva película a la base de datos.
-  - Valida si existe una pelicula con los mismos datos, de ser asi no la crea.
-  - Campos requeridos: título, director, anio, genero, descripcion.
+  - Descripción: La ruta permite crear una nueva película en la base de datos. Se valida la información recibida en la solicitud y se verifica si la película ya existe. Si la validación es exitosa y la película no existe, se inserta en la base de datos. Se devuelve una respuesta con un estado HTTP 201 y un mensaje indicando el éxito de la creación, junto con los datos de la película. Si hay errores de validación, se devuelve una respuesta de estado HTTP 400 con el mensaje de error correspondiente. Si la película ya existe, se devuelve una respuesta de estado HTTP 409. En caso de error durante el proceso, se maneja para su posterior procesamiento.
 
 - **Actualizar una película existente:**
   - Método: PUT
   - Ruta: `/movies/{id}`
-  - Descripción: Actualiza una película existente según su ID.
+  - Descripción: La ruta permite actualizar una película existente en la base de datos. Se obtiene el ID de la película y los datos actualizados de la solicitud. Se inicia una transacción para asegurar la consistencia de las actualizaciones. Se verifica si la película existe y, en caso contrario, se devuelve un error con estado HTTP 404. Se actualiza la película en la base de datos con los datos proporcionados. Se confirma la transacción y se devuelve una respuesta con estado HTTP 200 y un mensaje de éxito, junto con los datos actualizados de la película. En caso de error, se realiza un rollback de la transacción y se pasa el error para su posterior manejo. Es necesario contar con la configuración de la conexión a la base de datos y las funciones checkMovieExists y updateMovieById implementadas, así como los módulos necesarios para el correcto funcionamiento de la función.
 
 - **Eliminar una película:**
   - Método: DELETE
   - Ruta: `/movies/{id}`
-  - Descripción: Elimina una película específica según su ID.
-
-- **Sección de favoritos:**
-  - Agregar una película a favoritos:
+  - Descripción: La ruta permite eliminar una película de la base de datos. Se valida el ID proporcionado para asegurarse de que sea un número válido. Se ejecuta una consulta SQL para eliminar la película utilizando el ID. Si la eliminación es exitosa y afecta una fila en la base de datos, se devuelve una respuesta con estado HTTP 200 y un mensaje de éxito. Si la eliminación no afecta ninguna fila, se devuelve un error con estado HTTP 404 indicando que la película no existe. En caso de error durante el proceso, se maneja para su posterior procesamiento. Es importante configurar correctamente la conexión a la base de datos y validar el ID antes de realizar la eliminación.
+  
+- **Obtener favoritos:**
+  - Método: GET
+  - Ruta: `/movies`
+  - Descripción: La ruta recupera la lista de películas favoritas desde una base de datos. Se ejecuta una consulta SQL para obtener los favoritos y se verifica si existen resultados. Si no se encontraron favoritos, se devuelve un error con estado HTTP 404. Luego, los resultados se formatean según el formato deseado y se devuelven en una respuesta de éxito con estado HTTP 200. En caso de error durante el proceso, se maneja para su posterior procesamiento. 
+   
+-  **Agregar una película a favoritos:**
     - Método: POST
     - Ruta: `/favorites`
-    - Descripción: Agrega una película a la sección de favoritos.
-  - Eliminar una película de favoritos:
+    - Descripción: La ruta permite agregar una película a la lista de favoritos en la base de datos. Se verifica si la película existe y si ya está marcada como favorita. Si la película no existe, se devuelve un error con estado HTTP 404. Si la película ya está en favoritos, se devuelve un error con estado HTTP 400. En caso contrario, se agrega la película a la lista de favoritos y se devuelve una respuesta de éxito con estado HTTP 200. En caso de error durante el proceso, se maneja para su posterior procesamiento.
+  
+-  **Eliminar una película de favoritos:**
     - Método: DELETE
     - Ruta: `/favorites/{id}`
-    - Descripción: Elimina una película de la sección de favoritos.
+    - Descripción: La ruta elimina una película de la lista de favoritos en la base de datos. Se verifica si la película está marcada como favorita y, en caso contrario, se devuelve un error con estado HTTP 404 indicando que la película no está en favoritos. Luego, se elimina la película de la lista de favoritos en la base de datos utilizando las funciones correspondientes. Además, se actualiza el estado de la película. Finalmente, se devuelve una respuesta de éxito con estado HTTP 200 y un mensaje indicando que la película ha sido eliminada de favoritos correctamente. En caso de error durante el proceso, se maneja para su posterior procesamiento.
 
 - **Filtros:**
   - Método: GET
   - Ruta: `/filterMovies`
-  - Descripción: El filtro de películas es una función que permite buscar y filtrar películas en una base de datos. Se pueden aplicar filtros por año, género, director y favorita. La función recibe una solicitud HTTP y devuelve una respuesta JSON con las películas que coinciden con los filtros. Si no se encuentran películas que cumplan con los filtros, se devuelve un mensaje de error. La función utiliza consultas dinámicas y parámetros para garantizar la seguridad y prevenir ataques de inyección de SQL. Es necesario configurar la conexión a la base de datos y asegurarse de tener los módulos necesarios instalados.
+  - Descripción: El filtro de películas es una ruta que permite buscar y filtrar películas en la base de datos. Se pueden aplicar filtros por año, género, director y favorita. La función recibe una solicitud HTTP y devuelve una respuesta JSON con las películas que coinciden con los filtros. Si no se encuentran películas que cumplan con los filtros, se devuelve un mensaje de error. La función utiliza consultas dinámicas y parámetros para garantizar la seguridad y prevenir ataques de inyección de SQL. Es necesario configurar la conexión a la base de datos y asegurarse de tener los módulos necesarios instalados.
 
 ## Estructura del Proyecto
 
