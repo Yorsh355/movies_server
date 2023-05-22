@@ -45,8 +45,8 @@ Este es un sistema de backend para administrar películas, con la capacidad de r
 
 - **Filtros:**
   - Método: GET
-  - Ruta: `/movies/filter`
-  - Descripción: Permite filtrar películas por anio, director, genero y favoritas. Se pueden usar uno o varios filtros combinados.
+  - Ruta: `/filterMovies`
+  - Descripción: El filtro de películas es una función que permite buscar y filtrar películas en una base de datos. Se pueden aplicar filtros por año, género, director y favorita. La función recibe una solicitud HTTP y devuelve una respuesta JSON con las películas que coinciden con los filtros. Si no se encuentran películas que cumplan con los filtros, se devuelve un mensaje de error. La función utiliza consultas dinámicas y parámetros para garantizar la seguridad y prevenir ataques de inyección de SQL. Es necesario configurar la conexión a la base de datos y asegurarse de tener los módulos necesarios instalados.
 
 ## Estructura del Proyecto
 

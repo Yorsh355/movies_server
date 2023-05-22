@@ -1,4 +1,4 @@
-// Almacena consultar todos los favoritos
+// Consultar todos los favoritos
 const getFavoritesQuery = `
   SELECT movies.*, favorites.added_date
   FROM movies
